@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador de Pontos - Buraco</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .winner-animation {
+            animation: celebration 2s ease-in-out infinite;
+        }
+        
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .dark .bg-white { background-color: #181818; }
+        .dark .text-gray-900 { color: #ffffff; }
+        .dark .text-gray-700 { color: #d1d5db; }
+        .dark .border-gray-300 { border-color: #374151; }
+        .dark .bg-gray-50 { background-color: #1f2937; }
+        .dark .bg-gray-100 { background-color: #111827; }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">🃏 Placar Buraco/Tranca 🃏</h1>
+            <p class="text-gray-600 dark:text-gray-300">Primeira dupla a atingir 3000 pontos vence!</p>
+            <div class="mt-4 bg-primary/10 dark:bg-primary/20 rounded-lg p-4 inline-block">
+                <span class="text-lg font-semibold text-gray-900 dark:text-white">Rodada: </span>
+                <span id="contadorRodada" class="text-2xl font-bold text-primary">0</span>
+            </div>
+        </div>
+
+        <!-- Configuração das Duplas -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <!-- Dupla 1 -->
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border-2 border-primary/20">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Dupla 1</h2>
+                <div class="space-y-3">
+                    <input type="text" id="jogador1a" placeholder="Nome do Jogador 1" 
+                           class="w-full p-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <input type="text" id="jogador1b" placeholder="Nome do Jogador 2" 
+                           class="w-full p-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                
+                <!-- Pontuação Dupla 1 -->
+                <div class="mt-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pontos da Mesa</label>
+                            <input type="number" id="cartas1" min="0" value="0" 
+                                   class="w-full p-2 text-base border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pontos das Cartas</label>
+                            <input type="number" id="batida1" min="0" value="0" 
+                                   class="w-full p-2 text-base border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pontos a Pagar</label>
+                        <input type="number" id="desconto1" min="0" value="0" 
+                               class="w-full p-2 text-base border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <button onclick="calcularPontos(1)" 
+                            class="w-full bg-primary text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+                        Somar Rodada
+                    </button>
+                </div>
+
+                <!-- Total Dupla 1 -->
+                <div class="mt-6 text-center">
+                    <div class="text-3xl font-bold text-primary" id="total1">0</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Total de Pontos</div>
+                </div>
+            </div>
+
+            <!-- Dupla 2 -->
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border-2 border-primary/20">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Dupla 2</h2>
+                <div class="space-y-3">
+                    <input type="text" id="jogador2a" placeholder="Nome do Jogador 1" 
+                           class="w-full p-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <input type="text" id="jogador2b" placeholder="Nome do Jogador 2" 
+                           class="w-full p-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                
+                <!-- Pontuação Dupla 2 -->
+                <div class="mt-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pontos da Mesa</label>
+                            <input type="number" id="cartas2" min="0" value="0" 
+                                   class="w-full p-2 text-base border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pontos das Cartas</label>
+                            <input type="number" id="batida2" min="0" value="0" 
+                                   class="w-full p-2 text-base border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pontos a Pagar</label>
+                        <input type="number" id="desconto2" min="0" value="0" 
+                               class="w-full p-2 text-base border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <button onclick="calcularPontos(2)" 
+                            class="w-full bg-primary text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+                        Somar Rodada
+                    </button>
+                </div>
+
+                <!-- Total Dupla 2 -->
+                <div class="mt-6 text-center">
+                    <div class="text-3xl font-bold text-primary" id="total2">0</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Total de Pontos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histórico de Rodadas -->
+        <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📋 Histórico de Rodadas</h3>
+            <div id="historico" class="space-y-2 max-h-60 overflow-y-auto">
+                <p class="text-gray-600 dark:text-gray-400 text-center italic">Nenhuma rodada jogada ainda</p>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button onclick="novaPartida()" 
+                    class="bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                🔄 Nova Partida
+            </button>
+            <button onclick="limparRodada()" 
+                    class="bg-yellow-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-yellow-700 transition-colors">
+                🧹 Limpar Rodada Atual
+            </button>
+        </div>
+
+        <!-- Modal do Vencedor -->
+        <div id="modalVencedor" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-lg max-w-md mx-4 text-center winner-animation">
+                <div class="text-6xl mb-4">🏆</div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Parabéns!</h2>
+                <p id="textoVencedor" class="text-lg text-gray-700 dark:text-gray-300 mb-6"></p>
+                <div class="space-y-4">
+                    <button onclick="compartilharResultado()" 
+                            class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                        📱 Compartilhar Resultado
+                    </button>
+                    <button onclick="novaPartida()" 
+                            class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+                        🎮 Nova Partida
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais para armazenar os dados da partida
+        let pontosDupla1 = 0;
+        let pontosDupla2 = 0;
+        let historico = [];
+        let partidaFinalizada = false;
+        let numeroRodada = 0;
+        let duplasJogaramRodada = { dupla1: false, dupla2: false };
+
+        // Configuração do tema escuro
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        function calcularPontos(dupla) {
+            if (partidaFinalizada) {
+                alert('A partida já foi finalizada! Inicie uma nova partida.');
+                return;
+            }
+
+            // Verificar se esta dupla já jogou nesta rodada
+            if (duplasJogaramRodada[`dupla${dupla}`]) {
+                alert('Esta dupla já jogou nesta rodada! Aguarde a outra dupla jogar.');
+                return;
+            }
+
+            const cartas = parseInt(document.getElementById(`cartas${dupla}`).value) || 0;
+            const batida = parseInt(document.getElementById(`batida${dupla}`).value) || 0;
+            const desconto = parseInt(document.getElementById(`desconto${dupla}`).value) || 0;
+            
+            const pontosDaRodada = cartas + batida - desconto;
+            
+            if (dupla === 1) {
+                pontosDupla1 += pontosDaRodada;
+                document.getElementById('total1').textContent = pontosDupla1;
+            } else {
+                pontosDupla2 += pontosDaRodada;
+                document.getElementById('total2').textContent = pontosDupla2;
+            }
+
+            // Marcar que esta dupla já jogou
+            duplasJogaramRodada[`dupla${dupla}`] = true;
+
+            // Verificar se é a primeira dupla a jogar na rodada
+            if (!duplasJogaramRodada.dupla1 || !duplasJogaramRodada.dupla2) {
+                // Se apenas uma dupla jogou, incrementar rodada
+                if (!duplasJogaramRodada.dupla1 || !duplasJogaramRodada.dupla2) {
+                    numeroRodada++;
+                    document.getElementById('contadorRodada').textContent = numeroRodada;
+                }
+            }
+
+            // Adicionar ao histórico
+            const nomeDupla = obterNomeDupla(dupla);
+            historico.push({
+                dupla: dupla,
+                nome: nomeDupla,
+                cartas: cartas,
+                batida: batida,
+                desconto: desconto,
+                pontos: pontosDaRodada,
+                total: dupla === 1 ? pontosDupla1 : pontosDupla2,
+                rodada: numeroRodada
+            });
+
+            atualizarHistorico();
+            limparCamposRodada(dupla);
+
+            // Verificar se ambas as duplas jogaram e se há um vencedor
+            if (duplasJogaramRodada.dupla1 && duplasJogaramRodada.dupla2) {
+                // Resetar controle para próxima rodada
+                duplasJogaramRodada = { dupla1: false, dupla2: false };
+                
+                // Verificar se alguém ganhou (somente depois que ambas jogaram)
+                if (pontosDupla1 >= 3000 || pontosDupla2 >= 3000) {
+                    mostrarVencedor();
+                }
+            }
+        }
+
+        function obterNomeDupla(dupla) {
+            const jogador1 = document.getElementById(`jogador${dupla}a`).value || `Jogador ${dupla}A`;
+            const jogador2 = document.getElementById(`jogador${dupla}b`).value || `Jogador ${dupla}B`;
+            return `${jogador1} & ${jogador2}`;
+        }
+
+        function atualizarHistorico() {
+            const historicoDiv = document.getElementById('historico');
+            
+            if (historico.length === 0) {
+                historicoDiv.innerHTML = '<p class="text-gray-600 dark:text-gray-400 text-center italic">Nenhuma rodada jogada ainda</p>';
+                return;
+            }
+
+            historicoDiv.innerHTML = historico.slice(-10).reverse().map(rodada => {
+                const sinal = rodada.pontos >= 0 ? '+' : '';
+                return `
+                    <div class="bg-white dark:bg-gray-700 p-3 rounded border-l-4 border-primary">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-900 dark:text-white">
+                                <span class="bg-primary/20 text-primary px-2 py-1 rounded text-xs font-bold mr-2">R${rodada.rodada}</span>
+                                ${rodada.nome}
+                            </span>
+                            <span class="text-sm text-gray-600 dark:text-gray-300">
+                                Cartas: ${rodada.cartas} | Batida: ${rodada.batida} | Desconto: -${rodada.desconto}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="text-lg font-bold ${rodada.pontos >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${sinal}${rodada.pontos} pontos
+                            </span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Total: ${rodada.total}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function limparCamposRodada(dupla) {
+            document.getElementById(`cartas${dupla}`).value = '0';
+            document.getElementById(`batida${dupla}`).value = '0';
+            document.getElementById(`desconto${dupla}`).value = '0';
+        }
+
+        function limparRodada() {
+            limparCamposRodada(1);
+            limparCamposRodada(2);
+        }
+
+        function mostrarVencedor() {
+            partidaFinalizada = true;
+            let vencedor, pontos;
+            
+            if (pontosDupla1 >= 3000 && pontosDupla2 >= 3000) {
+                // Caso raro onde ambas chegam a 3000 na mesma rodada
+                if (pontosDupla1 > pontosDupla2) {
+                    vencedor = obterNomeDupla(1);
+                    pontos = pontosDupla1;
+                } else {
+                    vencedor = obterNomeDupla(2);
+                    pontos = pontosDupla2;
+                }
+            } else if (pontosDupla1 >= 3000) {
+                vencedor = obterNomeDupla(1);
+                pontos = pontosDupla1;
+            } else {
+                vencedor = obterNomeDupla(2);
+                pontos = pontosDupla2;
+            }
+
+            document.getElementById('textoVencedor').textContent = 
+                `A dupla ${vencedor} venceu com ${pontos} pontos!`;
+            document.getElementById('modalVencedor').classList.remove('hidden');
+            document.getElementById('modalVencedor').classList.add('flex');
+        }
+
+        function compartilharResultado() {
+            const vencedor = document.getElementById('textoVencedor').textContent;
+            const placarFinal = `Placar Final: ${obterNomeDupla(1)} - ${pontosDupla1} x ${pontosDupla2} - ${obterNomeDupla(2)}`;
+            
+            const textoCompartilhamento = `🃏 Partida de Buraco Finalizada! 🏆\n\n${vencedor}\n\n${placarFinal}\nRodadas jogadas: ${numeroRodada}\n\n#Buraco #JogoDeCartas`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Resultado da Partida de Buraco',
+                    text: textoCompartilhamento
+                });
+            } else {
+                // Fallback para navegadores que não suportam Web Share API
+                navigator.clipboard.writeText(textoCompartilhamento).then(() => {
+                    alert('Resultado copiado para a área de transferência!');
+                });
+            }
+        }
+
+        function novaPartida() {
+            pontosDupla1 = 0;
+            pontosDupla2 = 0;
+            historico = [];
+            partidaFinalizada = false;
+            numeroRodada = 0;
+            duplasJogaramRodada = { dupla1: false, dupla2: false };
+
+            document.getElementById('total1').textContent = '0';
+            document.getElementById('total2').textContent = '0';
+            document.getElementById('contadorRodada').textContent = '0';
+            
+            // Limpar nomes dos jogadores
+            document.getElementById('jogador1a').value = '';
+            document.getElementById('jogador1b').value = '';
+            document.getElementById('jogador2a').value = '';
+            document.getElementById('jogador2b').value = '';
+            
+            limparRodada();
+            atualizarHistorico();
+            
+            // Fechar modal se estiver aberto
+            document.getElementById('modalVencedor').classList.add('hidden');
+            document.getElementById('modalVencedor').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
